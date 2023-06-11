@@ -1,17 +1,13 @@
 import { Box, Button, Container, TextField, Typography, FormControl } from "@mui/material"
 import React from "react"
-import { useDispatch } from "react-redux";
-import { addDetails } from "../Redux/Reducers/details.Reducer.js";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from "react-router";
-import '../Styles/DetailPage.css'
-const DetailPage = (props) => {
-    const dispatch = useDispatch()
+import axios from "axios";
+const CreateCandidate = (props) => {
     const notify = (value) => {
         toast(value?.toString())
     }
-    const navigate = useNavigate()
+
     const [value, setValue] = React.useState()
 
     const handler = (e) => {
@@ -21,14 +17,18 @@ const DetailPage = (props) => {
     }
     const Save = async () => {
         try {
-            if (value?.name && value?.cnic && /^(?:\d{5}-\d{7}-\d{1})$/.test(value?.cnic)) {
-                dispatch(addDetails({ ...value }))
-                navigate('/ballot')
+            if (value?.name && value?.cnic && value?.title) {
+
+                const response = await axios.post('http://localhost:4000/create-candidate', { ...value })
+                if (response?.status === 200) {
+                    notify("Candidate Created SuccessFully")
+                }
             } else {
-                notify("Please Fill Form Correctly!")
+                notify("please fill Form Correctly!")
             }
         } catch (error) {
-            console.log(error?.message)
+            console.log(error)
+            notify(error?.response?.data?.message)
         }
     }
 
@@ -38,14 +38,20 @@ const DetailPage = (props) => {
             <ToastContainer />
             <Box className="ForForm" sx={{ marginLeft: "35%", transform: "translateX(-50%)", border: "2px solid black", borderRadius: "5px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", alignContent: "center" }}>
                 <h1>Voting System</h1>
+                <h3>Create Candidate</h3>
                 <FormControl>
-                    <Typography>Enter Your Name:</Typography>
+                    <Typography>Enter  Name:</Typography>
                     <TextField placeholder="XXXX XXXX" name="name" onChange={(e) => handler(e)} />
                 </FormControl><br />
                 <FormControl>
-                    <Typography>Enter Your Cnic:</Typography>
+                    <Typography>Enter  Cnic:</Typography>
                     <TextField placeholder="XXXXX-XXXXXXX-X" name="cnic" onChange={(e) => handler(e)} />
                 </FormControl><br />
+                <FormControl>
+                    <Typography>Enter  Title:</Typography>
+                    <TextField name="title" onChange={(e) => handler(e)} />
+                </FormControl>
+                <br />
                 <Box>
                     <Button onClick={Save} variant="contained">Save</Button>
                 </Box><br /><br />
@@ -53,4 +59,4 @@ const DetailPage = (props) => {
         </Container>
     )
 }
-export default DetailPage
+export default CreateCandidate
